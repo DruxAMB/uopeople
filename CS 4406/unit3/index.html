@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bouncing Ball Animation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+    <script>
+        // Create the scene, camera, and renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create the sphere (or cube or torus knot)
+        const geometry = new THREE.SphereGeometry(1, 32, 32); // Sphere
+        const material = new THREE.MeshPhongMaterial({ color: 0x0000ff }); // Initial color (blue)
+        const myMesh = new THREE.Mesh(geometry, material);
+        scene.add(myMesh);
+
+        // Set up lighting (light-yellow in the upper-left corner)
+        const light = new THREE.PointLight(0xFFFFAA, 1, 100);
+        light.position.set(-10, 10, 10);
+        scene.add(light);
+
+        // Position the camera
+        camera.position.z = 5;
+
+        // Variables for motion
+        let velocityX = 0.05;
+        let velocityY = 0.05;
+        const boxSize = 3; // Adjust for the limits of the viewing area
+
+        // Function to update the object's position and check for edge collisions
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Move the object
+            myMesh.position.x += velocityX;
+            myMesh.position.y += velocityY;
+
+            // Check for collisions with the viewing area edges (bounce effect)
+            if (myMesh.position.x > boxSize || myMesh.position.x < -boxSize) {
+                velocityX = -velocityX; // Reverse direction on X-axis
+                changeColor(); // Change color
+            }
+            if (myMesh.position.y > boxSize || myMesh.position.y < -boxSize) {
+                velocityY = -velocityY; // Reverse direction on Y-axis
+                changeColor(); // Change color
+            }
+
+            // Render the scene
+            renderer.render(scene, camera);
+        }
+
+        // Function to change color on bounce
+        function changeColor() {
+            const randomColor = Math.random() * 0xffffff; // Generate a random color
+            myMesh.material.color.setHex(randomColor);
+        }
+
+        // Call the animate function to start the loop
+        animate();
+
+        // Handle window resizing
+        window.addEventListener('resize', () => {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
+    </script>
+</body>
+</html>
