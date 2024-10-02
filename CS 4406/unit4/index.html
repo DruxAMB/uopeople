@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Cube with Textures</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    // Scene, Camera, and Renderer setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Load textures
+    const loader = new THREE.TextureLoader();
+    const textures = [
+        loader.load('https://pbs.twimg.com/media/GYhGUb3WYAANYEc?format=jpg&name=small'), // Face 1
+        loader.load('https://pbs.twimg.com/media/GYf_d8HWsAA-f7y?format=jpg&name=360x360'), // Face 2
+        loader.load('https://pbs.twimg.com/media/GYf_d-cXoAA9MH6?format=jpg&name=360x360'), // Face 3
+        loader.load('https://pbs.twimg.com/media/GY6DaerWwAA1W3o?format=jpg&name=small'), // Face 4
+        loader.load('https://th.bing.com/th?id=OIF.xEEZpgSjm5jnMDhD%2bm%2f0Pg&rs=1&pid=ImgDetMain'), // Face 5
+        loader.load('https://pbs.twimg.com/media/GY11CeuXoAAg5Gm?format=jpg&name=small'), // Face 6
+    ];
+
+    // Create a box geometry and apply textures
+    const geometry = new THREE.BoxGeometry();
+    const materials = textures.map(texture => new THREE.MeshBasicMaterial({ map: texture }));
+    const cube = new THREE.Mesh(geometry, materials);
+    scene.add(cube);
+
+    // Add light to the scene
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(5, 5, 5).normalize();
+    scene.add(light);
+
+    // Position the camera
+    camera.position.z = 5;
+
+    // Animation and auto-rotation logic
+    function animate() {
+        requestAnimationFrame(animate);
+        cube.rotation.x += 0.01; // Rotate cube on x-axis
+        cube.rotation.y += 0.01; // Rotate cube on y-axis
+        renderer.render(scene, camera);
+    }
+
+    // Add controls for rotating with arrow keys
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'ArrowRight') cube.rotation.y += 0.1;
+        if (event.key === 'ArrowLeft') cube.rotation.y -= 0.1;
+        if (event.key === 'ArrowUp') cube.rotation.x -= 0.1;
+        if (event.key === 'ArrowDown') cube.rotation.x += 0.1;
+    });
+
+    // Start the animation loop
+    animate();
+</script>
+
+</body>
+</html>
