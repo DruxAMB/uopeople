@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Methane Molecule Model</title>
+  <style>
+    body { margin: 0; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+<script>
+  // Create the scene, camera, and renderer
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true; // Enable shadows
+  document.body.appendChild(renderer.domElement);
+
+  // Add a green plane for the ground
+  const planeGeometry = new THREE.PlaneGeometry(50, 50);
+  const planeMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+  const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+  plane.rotation.x = -Math.PI / 2; // Rotate plane to be horizontal
+  plane.receiveShadow = true; // The plane will receive shadows
+  plane.position.y = -2; // Move the plane down
+  scene.add(plane);
+
+  // Create materials for the atoms
+  const carbonMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 }); // Red for carbon
+  const hydrogenMaterial = new THREE.MeshPhongMaterial({ color: 0x0000ff }); // Blue for hydrogen
+  const bondMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff, emissive: 0x404040 }); // White bonds with emissive light gray
+
+  // Create spheres for the atoms
+  const carbonAtom = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 32), carbonMaterial);
+  carbonAtom.position.set(0, 0, 0); // Carbon atom at the center
+  carbonAtom.castShadow = true; // Cast shadows
+  scene.add(carbonAtom);
+
+  const hydrogenAtoms = [];
+  const hydrogenPositions = [
+    [2, 1, 1],
+    [-2, 1, 1],
+    [1, -2, 1],
+    [-1, -2, -1]
+  ];
+
+  hydrogenPositions.forEach(pos => {
+    const hydrogenAtom = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), hydrogenMaterial);
+    hydrogenAtom.position.set(pos[0], pos[1], pos[2]);
+    hydrogenAtom.castShadow = true; // Cast shadows
+    scene.add(hydrogenAtom);
+    hydrogenAtoms.push(hydrogenAtom);
+  });
+
+  // Create cylinders for the bonds
+  const bondGeometry = new THREE.CylinderGeometry(0.1, 0.1, 2.5, 32);
+  const bonds = [];
+
+  hydrogenPositions.forEach(pos => {
+    const bond = new THREE.Mesh(bondGeometry, bondMaterial);
+    bond.position.set((pos[0] / 2), (pos[1] / 2), (pos[2] / 2)); // Center bond between atoms
+    bond.lookAt(new THREE.Vector3(0, 0, 0)); // Rotate bonds toward the carbon atom
+    bond.castShadow = true; // Cast shadows
+    scene.add(bond);
+    bonds.push(bond);
+  });
+
+  // Add lighting to the scene
+  const pointLight = new THREE.PointLight(0xffffff, 1);
+  pointLight.position.set(5, 10, 5);
+  pointLight.castShadow = true; // Enable light to cast shadows
+  scene.add(pointLight);
+
+  const ambientLight = new THREE.AmbientLight(0x404040); // Soft light
+  scene.add(ambientLight);
+
+  // Add mouse controls for rotation
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableZoom = true;
+
+  // Position the camera
+  camera.position.z = 10;
+  camera.position.y = 3;
+  camera.lookAt(new THREE.Vector3(0, 0, 0)); // Ensure the camera looks at the methane molecule
+
+  // Animation loop
+  function animate() {
+    requestAnimationFrame(animate);
+
+    // Rotate the molecule
+    carbonAtom.rotation.y += 0.01; // Rotate carbon atom
+    hydrogenAtoms.forEach(atom => {
+      atom.rotation.y += 0.01; // Rotate hydrogen atoms
+    });
+    bonds.forEach(bond => {
+      bond.rotation.y += 0.01; // Rotate bonds
+    });
+
+    // Render the scene
+    controls.update();
+    renderer.render(scene, camera);
+  }
+
+  animate(); // Start the animation loop
+
+  // Adjust the scene when the window is resized
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+</script>
+</body>
+</html>
