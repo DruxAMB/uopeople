@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+
+<html lang ="en">
+
+<head>
+
+<script type="text/javascript" src="https://getfirebug.com/firebug-lite-debug.js"></script>
+
+<meta name="description" content="CS4406ComputerGraphics_Assignment6" />
+
+   <meta charset="utf-8" />
+
+<title>Assignment6: we will experiment with animation by creating two sphere
+
+geometries(Earth and Moon)</title>
+
+<style>
+
+  #container {
+
+  background: #ffffff;
+
+  width: 100%;
+
+  height: 100%;
+
+  }
+
+    </style>
+
+
+
+  <meta charset=utf-8 />  
+
+  <style id="jsbin-css">
+
+  </style>
+
+  </head>
+
+  <body>
+
+  <div id="container">
+
+   <h4></h4>
+
+  </div>
+
+  </body>
+
+
+
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+
+  <script src="http://uopeopleweb.com/js/dat.gui.min.js"></script>
+
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r58/three.min.js"></script>
+
+  <script src="http://uopeopleweb.com/js/OrbitControls.js"></script>
+
+  <script src="http://uopeopleweb.com/js/math.js"></script>
+
+  <script src="http://uopeopleweb.com/js/Detector.js"></script>
+
+
+
+  <script src="http://uopeopleweb.com/js/Detector.js"></script>
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/108/three.min.js"></script>
+
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.5/dat.gui.min.js"></script>
+
+  <script src="https://cdn.rawgit.com/mrdoob/three.js/master/examples/js/controls/OrbitControls.js"></script>
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/6.2.1/math.min.js"></script>
+
+  <script type="text/javascript">
+
+  // scene size
+
+  var WIDTH = 550, HEIGHT = 500;
+
+  // camera attributes
+
+  var VIEW_ANGLE = 40, ASPECT = WIDTH / HEIGHT, NEAR = 1, FAR = 1000;
+
+  // DOM element
+
+  var $container = $('#container');
+
+
+
+    // WebGL renderer, camera, and a scene
+
+        var renderer = new THREE.WebGLRenderer();
+
+        renderer.shadowMap.enabled = true;
+
+    var scene = new THREE.Scene();
+
+        //background should be black
+
+        scene.background = new THREE.Color(0x000000 );
+
+    var clock = new THREE.Clock();
+
+    var camera = new THREE.PerspectiveCamera(VIEW_ANGLE,ASPECT,NEAR,FAR);
+
+    camera.position.z = 60;    
+
+    scene.add(camera);
+
+        // set up the camera controls.  
+
+    //var cameraControls = new THREE.OrbitControls(camera, renderer.domElement);
+
+    //cameraControls.addEventListener( 'mousemove', renderer );
+
+        //cameraControls.autoRotate = false;
+
+    renderer.setSize(WIDTH, HEIGHT);
+
+    // attach the render-supplied DOM element
+
+    $container.append(renderer.domElement);
+
+        var earth = new
+
+    THREE.TextureLoader().load("");
+
+    earth.wrapT = THREE.RepeatWrapping;
+
+        // apply the texture
+
+        var earthText = new THREE.MeshLambertMaterial({map: earth});
+
+        //load a texture
+
+        var moon = new
+
+    THREE.TextureLoader().load("https://upload.wikimedia.org/wikipedia/commons/d/db/Moonmap_from_clementine_data.png");
+
+    var moonText = new THREE.MeshLambertMaterial({map: moon});
+
+    //load 3D
+
+    var geometry1 = new THREE.SphereGeometry(2, 50, 50, 0.2, Math.PI * 2, 0, Math.PI )
+
+    var geometry2 = new THREE.SphereGeometry(7, 50, 50, 0.2, Math.PI * 2, 0, Math.PI )
+
+       //create polygons
+
+    myMoon = makeInstance(geometry1, moonText, 0, 0 , 16);
+
+    myEarth = makeInstance(geometry2, earthText, 0, 0 ,0);
+
+    //Create something to attach the Moon
+
+    pivot = new THREE.Object3D();
+
+    scene.add(pivot);
+
+    //this connects the moon
+
+    pivot.add(myMoon);
+
+    pivot.add(myEarth);
+
+    //create a new light
+
+    var light = new THREE.SpotLight( 0xffffff);
+
+    light.position.set(45,0,6)
+
+    light.castShadow = true;
+
+        scene.add(light);
+
+       //add some ambient light
+
+        var aLight = new THREE.AmbientLight(0xffffff, 0.05);
+
+        scene.add(aLight);
+
+        //Takes a geometry, material, and coordinates.
+
+        function makeInstance(geometry, material, x, y, z) {
+
+          const polygon = new THREE.Mesh(geometry, material);
+
+    //add polygon
+
+          scene.add(polygon);
+
+          polygon.position.set(x, y, z);
+
+          polygon.castShadow = true;
+
+          polygon.receiveShadow = true;
+
+          return polygon;
+
+          }
+
+
+
+      //create a function to synchronize objects
+
+     function syncCam(object, target, Ztrans){
+
+      object.position.copy(target.position);
+
+      object.rotation.copy(target.rotation);
+
+      object.translateZ(Ztrans);
+
+      object.updateMatrix();
+
+
+
+             }  
+
+        function align(object, x,y,z){
+
+             var vector = new THREE.Vector3(x,y,z);
+
+             var axis = new THREE.Vector3(0,1,0);
+
+             object.quaternion.setFromUnitVectors(axis, vector.clone().normalize());
+
+           }
+
+    function animate() {
+
+            //Make earth and moon rotate
+
+            pivot.rotation.y += 0.003;
+
+            myEarth.rotation.y += 0.002;
+
+     myMoon.rotation.y += 0.0006;
+
+    requestAnimationFrame(animate);
+
+    render();
+
+      }
+
+        function render() {
+
+      renderer.render(scene, camera);
+
+      }
+
+      animate();
+
+        </script>
+
+      </html>
+
+
+      </html>
+
